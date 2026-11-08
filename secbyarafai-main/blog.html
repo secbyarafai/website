@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog - SecByArafai</title>
+    <meta name="description" content="Cybersecurity lab write-ups: home lab build, Snort IDS rules and malware traffic analysis with Wireshark." />
+    <meta name="theme-color" content="#0a0f0a" />
+    <link rel="canonical" href="https://www.secbyarafai.com/blog.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SecByArafai" />
+    <meta property="og:title" content="Blog - SecByArafai" />
+    <meta property="og:description" content="Cybersecurity lab write-ups: home lab build, Snort IDS rules and malware traffic analysis with Wireshark." />
+    <meta property="og:url" content="https://www.secbyarafai.com/blog.html" />
+    <meta property="og:image" content="https://www.secbyarafai.com/img/logo-removebg-preview.png" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="img/logo-removebg-preview.png" />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="brand" href="index.html"><img src="img/logo-removebg-preview.png" alt="SecByArafai logo" /><h1>SecByArafai</h1></a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+        <nav id="nav-menu" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <!-- <a href="services.html">Services</a> -->
+          <a href="blog.html">Blog</a>
+          <a href="certifications.html">Certifications</a>
+          <!-- <a href="https://learn.secbyarafai.com">Free Cheat Sheet</a> -->
+        </nav>
+      </header>
+
+      <section>
+        <div class="sec-title"><h3>Blog</h3></div>
+
+        <div class="grid">
+          <div class="card">
+            <img src="./img/A_modern_cybersecurity_202603242132.png" class="blog-img" alt="Illustration of a cybersecurity home lab" loading="lazy" decoding="async" />
+
+            <h4>Building My Cybersecurity Home Lab</h4>
+            <p class="meta">
+              How I set up my first lab using Kali, Ubuntu, and Metasploitable.
+            </p>
+
+            <div class="actions">
+              <a class="btn" href="blog/post1.html">Read More</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <img src="./img/A_cybersecurity_intrusion_202603242140.png" class="blog-img" alt="Illustration of network intrusion detection" loading="lazy" decoding="async" />
+
+            <h4>Snort IDS Lab Explained</h4>
+            <p class="meta">
+              How I created detection rules and tested attacks.
+            </p>
+
+            <div class="actions">
+              <a class="btn" href="blog/post2.html">Read More</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <img src="./img/ChatGPT Image Nov 17, 2025, 01_46_49 AM (1).png" class="blog-img" alt="Illustration of malware traffic analysis" loading="lazy" decoding="async" />
+
+            <h4> Malware Traffic Analysis with Wireshark </h4>
+            <p class="meta">
+              How I analysed malware safely using Wireshark.
+            </p>
+
+            <div class="actions">
+              <a class="btn" href="blog/post3.html">Read More</a>
+            </div>
+          </div>
+
+          </div>
+      </section>
+    </div>
+    <script>
+      const toggle = document.getElementById("menu-toggle");
+      const nav = document.getElementById("nav-menu");
+
+ toggle.addEventListener("click", () => {
+        nav.classList.toggle("active");
+        const open = nav.classList.contains("active");
+        toggle.innerHTML = open ? "&#10005;" : "&#9776;";
+        toggle.setAttribute("aria-expanded", open);
+      });
+    </script>
+  </body>
+</html>
