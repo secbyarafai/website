@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home Lab — SecByArafai</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <a href="../blog.html" class="btn">← Back to Blog</a>
+      </header>
+
+      <section>
+        <div class="sec-title">
+          <h1 style="font-size: 40px">
+            Malware Traffic Analysis with Wireshark - Detecting Dridex C2
+            Traffic
+          </h1>
+        </div>
+        <div class="panel">
+          <img
+            src="../img/ChatGPT Image Nov 17, 2025, 01_46_49 AM (1).png"
+            class="me"
+          />
+          <h2 style="font-weight: bold; font-size: 40px">Introduction</h2>
+          <p style="font-size: 30px">
+            In this project, I analysed a PCAP capture of a compromised Windows
+            machine to uncover signs of a Dridex banking Trojan infection. Using
+            Wireshark I identified encrypted TLS sessions, extracted suspicious
+            Server Name Indication (SNI) domains, followed malicious TCP
+            streams, and confirmed active C2 beaconing.
+            <br /><br />
+            This post shows step-by-step how I discovered the infection along
+            with key Indicators of Compromise (IOCs) so you can replicate the
+            same process in your own malware traffic analysis lab.
+          </p>
+          <h2 style="font-weight: bold; font-size: 40px">
+            Lab Topology & Overview
+          </h2>
+          <p style="font-size: 30px">
+            • Host OS for analysis: Ubuntu. <br />
+            • Packet analysis tool: Wireshark
+          </p>
+          <h2 style="font-weight: bold; font-size: 40px">
+            Enviromental Setup & Pcap download
+          </h2>
+          <p style="font-size: 30px">
+            Before opening the PCAP file, I ensured my virtual machine was
+            isolated from the Internet so that any embedded malware activity
+            could NOT communicate externally. <br /><br />
+            I changed my VMware network adapter to LAN Segment (Away From
+            Internet):
+            <img src="../img/1_b_AbVnvN8cZ6NyeAmCLw-A.png" class="me" alt="" />
+            What this guarantees <br /><br />
+            • No accidental malware execution <br />• No C2 communication
+            leaving the VM <br />
+            • Safe packet analysis environment <br /><br />I installed Wireshark
+            on Ubuntu and prepared my workspace. Here is Wireshark immediately
+            after installation:
+            <img src="../img/1_QNcciHqy5M4jyqWqDRpluw.png" class="me" alt="" />
+            <img src="../img/1_dbnjHwzBkKr4Az4oFZsaWQ.png" class="me" alt="" />
+            I downloaded the PCAP file from the AlexisAhmed GitHub repository:
+            <img src="../img/1_hvpv33I2mMpPWn0lsD2cNQ.png" class="me" alt="" />
+          </p>
+          <h2 style="font-weight: bold; font-size: 40px">
+            Analysis Steps & Findings
+          </h2>
+          <p style="font-size: 30px">
+            After loading the PCAP into Wireshark, I began with a general look
+            at the traffic:
+            <img src="../img/image4.png" class="me" alt="" />
+            To make analysis easier, I added Source Port and Destination Port as
+            unresolved columns: • Source Port • Destination Port
+            <img src="../img/1_Tyv4PPufWQJttVG0621xfQ.png" class="me" alt="" />
+            <img src="../img/1_OeltPYqK11DhFRPBSWmBHw.png" class="me" alt="" />
+            Once the PCAP file was loaded into Wireshark, the first step was to
+            filter the dataset to focus on TLS and HTTP traffic, as these
+            protocols typically reveal suspicious outbound behaviour. After
+            applying the filter, it became clear that one internal IP address
+            10.4.1.101 was responsible for repeatedly initiating encrypted TLS
+            connections to multiple external servers. This repetition and
+            consistency suggested automated activity rather than normal
+            user-driven browsing, which immediately raised suspicion about the
+            host being infected or compromised.
+            <img src="../img/1_6t8tS3tfaVq1ANmBbbCjBQ.png" class="me" alt="" />
+            With the infected host identified, the next phase involved
+            inspecting the TLS Client Hello packets. These packets often contain
+            the Server Name Indication (SNI), which tells us exactly which
+            domain the client is attempting to reach even when the rest of the
+            traffic is encrypted. Most of the SNI values in this capture
+            corresponded to legitimate Microsoft-related services such as Skype
+            or telemetry domains. However, one domain stood out: i05l711.com.
+            This domain is not associated with any known legitimate service and
+            follows a naming pattern commonly used by malware families like
+            Dridex, which often generate random-looking command-and-control (C2)
+            domains. This discovery strongly indicated malicious outbound
+            communication. <br /><br />To validate the suspicion further, I
+            followed the TLS stream associated with the connection to
+            i05l711.com. As expected, the content of the stream was fully
+            encrypted, which is typical for modern malware that communicates
+            over HTTPS. However, even without decrypting the traffic, several
+            characteristics confirmed malicious behaviour. The encrypted data
+            appeared in repetitive intervals, mimicking the structure and timing
+            of botnet beaconing essentially periodic check-ins to a remote
+            command server. Additionally, embedded within the binary data were
+            identifiable strings resembling machine profiling information such
+            as city names, company placeholders, and timestamp like SomeState1,
+            SomeCity1, SomeCompany0, 2003030211145Z, 220401211145Z. These fields
+            are consistent with how Dridex bots register themselves with their
+            C2 infrastructure, further confirming that this was not normal
+            encrypted traffic but active malware communication.
+            <img src="../img/1_9yR-QI1uLNb5pFa8UoqkhQ.png" class="me" alt="" />
+            <img src="../img/1_9yR-QI1uLNb5pFa8UoqkhQ.png" class="me" alt="" />
+          </p>
+
+          <h2 style="font-weight: bold; font-size: 40px">
+            Full Indicator of Compromise (IOC list)
+          </h2>
+          <p style="font-size: 30px">
+            Malicious Domain (SNI) —  i05l711.com <br />Malicious IP Address (C2
+            Server) — 162.255.119.253 <br />Infected Internal Host (Victim
+            Machine) — 10.4.1.101 <br />Protocols and Ports Used — Protocol:
+            TLSv1.2, 443 (HTTPS) <br />Bot Metadata —  SomeState1, SomeCity1,
+            SomeCompany0 <br />C2 Timestamps — 2003030211145Z, 220401211145Z,
+            200928122056Z
+          </p>
+          <h2 style="font-weight: bold; font-size: 40px">Key Takeaways</h2>
+          <p style="font-size: 30px">
+            1. I learned the importance of isolating my analysis environment to
+            safely handle potentially malicious PCAP files. <br /> 2. I discovered how
+            encrypted malware traffic can still be identified through metadata
+            such as SNI and TLS handshake details. <br /> 3. I improved my Wireshark
+            skills by using custom columns and filters to quickly detect
+            suspicious activity. <br />4. I understood how infected hosts communicate
+            with external C2 servers through repeated encrypted outbound
+            traffic. <br />5. I gained experience extracting and documenting IOCs,
+            strengthening my malware analysis and reporting abilities.
+          </p>
+        </div>
+      </section>
+    </div>
+  </body>
+  <!-- <body>
+    <div class="wrap">
+
+    </div>
+
+
+    <div id="lightbox">
+      <span id="closeBtn">&times;</span>
+      <img id="lightbox-img" />
+    </div>
+
+
+    <script>
+      const images = document.querySelectorAll(".clickable-img");
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.getElementById("lightbox-img");
+      const closeBtn = document.getElementById("closeBtn");
+
+      images.forEach((img) => {
+        img.addEventListener("click", () => {
+          lightbox.style.display = "block";
+          lightboxImg.src = img.src;
+        });
+      });
+
+      closeBtn.onclick = () => {
+        lightbox.style.display = "none";
+      };
+
+      lightbox.onclick = (e) => {
+        if (e.target !== lightboxImg) {
+          lightbox.style.display = "none";
+        }
+      };
+    </script>
+  </body> -->
+</html>
